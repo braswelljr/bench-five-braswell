@@ -1,0 +1,53 @@
+{
+  "endOfLine": "auto",
+  "trailingComma": "none",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "semi": false,
+  "singleQuote": true,
+  "bracketSameLine": false,
+  "bracketSpacing": true,
+  "arrowParens": "avoid",
+  "useTabs": false,
+  "quoteProps": "as-needed",
+  "importOrder": [
+    "^react(\/.*)?$",
+    "^next(\/.*)?$",
+    "^clsx(\/.*)?$",
+    "^react-icons(\/.*)?$",
+    "^react-hook-form(\/.*)?$",
+    "^firebase(\/.*)?$",
+    "^framer-motion(\/.*)?$",
+    "^@headlessui(\/.*)?$",
+    "^@radix-ui(\/.*)?$",
+    "^match-sorter(\/.*)?$",
+    "^zustand(\/.*)?$",
+    "<THIRD_PARTY_MODULES>",
+    "^types$",
+    "^~local/(.*)$",
+    "^([~@.]{1,})\/config\/(.*)$",
+    "^([~@.]{1,})\/lib(\/.*)?$",
+    "^([~@.]{1,})\/hooks(\/.*)?$",
+    "^([~@.]{1,})\/components(\/.*)?$",
+    "^([~@.]{1,})\/context(\/.*)?$",
+    "^([~@.]{1,})\/utils(\/.*)?$",
+    "^([~@.]{1,})\/types(\/.*)?$",
+    "^([~@.]{1,})\/styles(\/.*)?$",
+    "^([~@.]{1,})\/assets(\/.*)?$",
+    "^[./]"
+  ],
+  "importOrderSeparation": false,
+  "importOrderSortSpecifiers": true,
+  "importOrderBuiltinModulesToTop": true,
+  "importOrderParserPlugins": [
+    "typescript",
+    "jsx",
+    "decorators-legacy"
+  ],
+  "importOrderMergeDuplicateImports": true,
+  "importOrderCombineTypeAndValueImports": true,
+  "plugins": [
+    "@ianvs/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
+  ]
+}

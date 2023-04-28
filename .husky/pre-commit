@@ -1,0 +1,30 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+. "$(dirname "$0")/common.sh"
+
+REMOVE="rm -rf dist/ yarn-error.log .swc/ .eslintcache .prettiercache"
+# remove files from previous builds
+eval $REMOVE
+
+# lint and build
+yarn run lint
+
+# lint and fix
+yarn run lint:fix
+
+# format code
+yarn run format
+
+# run build and test for truthy
+yarn run build
+# test for last command executed
+if [ $? -eq 0 ]; then
+  # remove build files
+  eval $REMOVE
+  echo -n "Build Successful 😆!"
+  exit 0
+
+  else
+    echo "Oops! Build failed 😢."
+    exit 130
+fi
