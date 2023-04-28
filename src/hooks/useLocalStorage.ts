@@ -7,10 +7,7 @@ import { useEffect, useState } from 'react'
  * @returns {any} localStorageValuee - value of the provided key stored in localStorage
  * @returns {Function} setLocalStorageValue - used to update the localStorage value
  */
-export default function useLocalStorage<T>(
-  localStorageKey: string,
-  initialValue = undefined
-): [localStorageValue: T, setlocalStorageValue: (value: T) => void] {
+export default function useLocalStorage<T>(localStorageKey: string, initialValue = undefined) {
   const [localStorageValue, setLocalStorageValue] = useState<T | undefined>(initialValue)
 
   useEffect(() => {
@@ -38,5 +35,5 @@ export default function useLocalStorage<T>(
     return () => window.removeEventListener('storage', syncState)
   }, [initialValue, localStorageKey])
 
-  return [localStorageValue as T, setLocalStorageValue]
+  return { localStorageValue, setLocalStorageValue }
 }

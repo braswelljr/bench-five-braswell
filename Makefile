@@ -45,7 +45,7 @@ format:
 
 .PHONY: clean
 clean:
-	rm -rf .next/ dist/ yarn-error.log .swc/ .eslintcache .prettiercache .contentlayercache .contentlayercache.lock .contentlayer
+	rm -rf dist/ yarn-error.log .swc/ .eslintcache .prettiercache .stylelintcache
 
 .PHONY: verbose-clean
 verbose-clean:
