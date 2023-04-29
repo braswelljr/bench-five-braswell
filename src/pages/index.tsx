@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '~/context/useStore'
 import { toDollars } from '~/utils/currency'

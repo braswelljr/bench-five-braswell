@@ -84,7 +84,7 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
 
       // create a new product
       getDownloadURL(pathReference)
-        .then(url => {
+        .then((url: string) => {
           const newProduct = {
             id: i,
             name,
