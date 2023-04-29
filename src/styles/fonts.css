@@ -1,7 +1,7 @@
 /* Zen Dots */
 @font-face {
   font-family: 'Zen Dots', cursive;
-  src: url('../assets/fonts/zen-dots.ttf');
+  src: url('./fonts/zen-dots.ttf');
   font-style: normal;
   font-display: swap;
 }
