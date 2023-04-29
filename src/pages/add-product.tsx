@@ -144,7 +144,9 @@ export default function AddProduct() {
           {/* image */}
           <div className="">
             <div className="">
-              {previewImage && <img src={previewImage} alt="preview image" className="h-28 w-28" />}
+              {previewImage && (
+                <img src={previewImage} alt="preview image" className="h-28 w-auto" />
+              )}
             </div>
             <label className="block">
               <span className="sr-only">Choose profile photo</span>
