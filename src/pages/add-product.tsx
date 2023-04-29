@@ -1,8 +1,8 @@
-import { KeyboardEvent, useEffect, useState } from 'react'
+import { ChangeEvent, KeyboardEvent, useEffect, useState } from 'react'
 import clsx from 'clsx'
-import { SubmitHandler, useForm } from 'react-hook-form'
+import { SubmitErrorHandler, SubmitHandler, useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
-import { v4 as uuid } from 'uuid'
+import { useToast } from '~/hooks/useToast'
 import {
   Select,
   SelectContent,
@@ -18,9 +18,10 @@ export default function AddProduct() {
   const [loading, setLoading] = useState(false)
   const [type, setType] = useState<ProductType>('book')
   const { ADD, isLoading } = useStore()
+  const { toast } = useToast()
+  const [previewImage, setPreviewImage] = useState<string | undefined>(undefined)
 
   interface Inputs {
-    id: string
     name: string
     price: number
     type: ProductType
@@ -34,27 +35,67 @@ export default function AddProduct() {
     handleSubmit,
     getValues,
     setValue,
+    reset,
     formState: { errors, isSubmitting, isSubmitted, isValid }
   } = useForm<Inputs>({
     mode: 'onChange',
     reValidateMode: 'onChange',
-    defaultValues: { id: uuid(), type: 'book' }
+    defaultValues: { type: 'book' }
   })
 
   // submit for login
   const onSubmit: SubmitHandler<Inputs> = async data => {
-    const Data = data
     // remove NaN from values from data.size object
     const size = Object.fromEntries(Object.entries(data.size).filter(([_, value]) => !isNaN(value)))
 
-    Data.size = size as ProductSize
+    ADD({ ...data, size: size } as ProductRequestI)
 
-    console.log(Data)
+    // reset form
+    reset()
+  }
 
-    ADD({
-      ...Data,
-      image: ''
-    } as ProductRequestI)
+  const onError: SubmitErrorHandler<Inputs> = errors => {
+    errors.description &&
+      toast({
+        variant: 'error',
+        title: 'Description is required',
+        description: 'Provide a description for the product'
+      })
+
+    errors.name &&
+      toast({
+        variant: 'error',
+        title: 'Name is required',
+        description: 'Provide a name for the product'
+      })
+
+    errors.price &&
+      toast({
+        variant: 'error',
+        title: 'Price is required',
+        description: 'Provide a price for the product'
+      })
+
+    errors.image &&
+      toast({
+        variant: 'error',
+        title: 'Image is required',
+        description: 'Provide an image for the product'
+      })
+
+    errors.size &&
+      toast({
+        variant: 'error',
+        title: 'Size is required',
+        description: 'Provide a size for the product'
+      })
+
+    errors.type &&
+      toast({
+        variant: 'error',
+        title: 'Type is required',
+        description: 'Select a type for the product'
+      })
   }
 
   // load on submit
@@ -68,10 +109,9 @@ export default function AddProduct() {
     if (!isValid || isSubmitted) setLoading(false)
   }, [isSubmitted, isValid])
 
+  // set type
   useEffect(() => {
-    // sync type
     setValue('type', type)
-    console.log(getValues('type'))
   }, [type])
 
   return (
@@ -80,7 +120,7 @@ export default function AddProduct() {
         id="add-product-form"
         action="#"
         method="post"
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmit, onError)}
         className=""
       >
         {/* navigation */}
@@ -100,30 +140,36 @@ export default function AddProduct() {
           </ul>
         </nav>
         {/* body */}
-        <section className="mx-auto max-w-5xl space-y-5 px-2 py-8 max-lg:mx-5 lg:max-w-5xl">
+        <section className="mx-auto max-w-3xl space-y-5 px-2 py-8 max-lg:px-7">
+          {/* image */}
+          <div className="">
+            <div className="">
+              {previewImage && <img src={previewImage} alt="preview image" className="h-28 w-28" />}
+            </div>
+            <label className="block">
+              <span className="sr-only">Choose profile photo</span>
+              <input
+                type="file"
+                accept="image/*"
+                className="block w-full text-sm text-neutral-800 file:mr-8 file:rounded-md file:border-0 file:bg-neutral-300 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-neutral-700 hover:file:bg-neutral-100"
+                {...register('image', { required: true })}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                  const file = event.target.files && event.target.files[0]
+
+                  if (file) {
+                    const reader = new FileReader()
+                    reader.readAsDataURL(file)
+
+                    reader.onload = () => setPreviewImage(reader.result as string)
+                  }
+                }}
+              />
+            </label>
+          </div>
           {/* id */}
           <div className="grid grid-cols-[10rem,1fr] items-center">
-            <label htmlFor="sku" className="block text-sm font-medium text-neutral-800">
-              SKU
-            </label>
-            <div className="mt-1">
-              <input
-                type="text"
-                id="sku"
-                className={clsx(
-                  'block w-full rounded-md border-neutral-300 shadow-sm focus:border-neutral-500 focus:ring-neutral-500 sm:text-sm'
-                )}
-                placeholder="SKU"
-                {...register('id', {
-                  required: false,
-                  value: uuid(),
-                  minLength: {
-                    value: 3,
-                    message: 'SKU must be at least 3 characters'
-                  }
-                })}
-              />
-            </div>
+            <div className="block text-sm font-medium text-neutral-800">SKU</div>
+            <div className="mt-1">#SKU will be generated on creating</div>
           </div>
           {/* name */}
           <div className="grid grid-cols-[10rem,1fr] items-start">
@@ -177,7 +223,7 @@ export default function AddProduct() {
             </label>
             <div className="mt-1">
               <input
-                type="number"
+                type="text"
                 id="price"
                 autoComplete="off"
                 {...register('price', {
@@ -188,6 +234,7 @@ export default function AddProduct() {
                     message: 'Price must be greater than 0'
                   }
                 })}
+                step={0.01}
                 placeholder="0.00"
                 onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                   // Check if the key pressed is a number or backspace
@@ -257,7 +304,7 @@ export default function AddProduct() {
                   </label>
                   <div className="mt-1">
                     <input
-                      type="number"
+                      type="text"
                       id="size"
                       autoComplete="off"
                       {...register('size.size', {
@@ -327,7 +374,7 @@ export default function AddProduct() {
                   </label>
                   <div className="mt-1">
                     <input
-                      type="number"
+                      type="text"
                       id="weight"
                       autoComplete="off"
                       {...register('size.weight', {
@@ -398,7 +445,7 @@ export default function AddProduct() {
                   </label>
                   <div className="mt-1">
                     <input
-                      type="number"
+                      type="text"
                       id="height"
                       autoComplete="off"
                       {...register('size.height', {
@@ -462,7 +509,7 @@ export default function AddProduct() {
                   </label>
                   <div className="mt-1">
                     <input
-                      type="number"
+                      type="text"
                       id="width"
                       autoComplete="off"
                       {...register('size.width', {
@@ -526,7 +573,7 @@ export default function AddProduct() {
                   </label>
                   <div className="mt-1">
                     <input
-                      type="number"
+                      type="text"
                       id="length"
                       autoComplete="off"
                       {...register('size.length', {

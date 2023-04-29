@@ -1,6 +1,16 @@
-import { Context, createContext, useCallback, useContext, useMemo, useState } from 'react'
+import {
+  Context,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from 'react'
 import { v4 as uuid } from 'uuid'
+import { useNavigate } from 'react-router-dom'
 import { useToast } from '~/hooks/useToast'
+import { getDownloadURL, storageRef, uploadBytes } from '~/utils/firebase'
 import { ProductI, ProductRequestI, StoreContextI, StoreProviderI } from '~/types/store'
 
 /**
@@ -24,57 +34,89 @@ export const StoreContext: Context<StoreContextI> = createContext<StoreContextI>
  */
 export default function StoreProvider({ children }: StoreProviderI): JSX.Element {
   const [isLoading, setLoading] = useState(false)
-  const [products, setProducts] = useState<ProductI[]>([])
+  const [products, setProducts] = useState<ProductI[]>(() => {
+    const products = localStorage.getItem('--products--')
+    return products ? JSON.parse(products) : []
+  })
   const { toast } = useToast()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    localStorage.setItem('--products--', JSON.stringify(products))
+  }, [products])
 
   const ADD = useCallback(
-    (product: ProductRequestI): void => {
+    async (product: ProductRequestI) => {
       // set loading
       setLoading(true)
       // destructure the product keys
       const { id, name, price, type, description, size, image } = product
       const i = id || uuid()
       const date = new Date().toISOString()
-
-      if (products.some((product: ProductI) => product.id === id)) {
+      if (
+        products.some(
+          (product: ProductI) => product.id === id || product.name.trim() === name.trim()
+        )
+      ) {
         toast({
           title: 'Action failed',
           description: 'Product already exists',
-          variant: 'info'
+          variant: 'warning'
+        })
+
+        return
+      }
+
+      // upload the image to firebase storage
+      const pathReference = storageRef(`/bench-five/images/${i}`)
+
+      // upload the image to firebase storage
+      const res = await uploadBytes(pathReference, image[0])
+
+      // check if the image is uploaded
+      if (!res) {
+        toast({
+          title: 'Action failed',
+          description: 'Image upload failed',
+          variant: 'error'
         })
       }
 
-      setProducts((prevProducts: ProductI[]) => [
-        ...prevProducts,
-        {
-          id: i,
-          name,
-          price,
-          type,
-          size,
-          description,
-          image,
-          createdAt: date,
-          updatedAt: date
-        }
-      ])
+      // create a new product
+      getDownloadURL(pathReference)
+        .then(url => {
+          const newProduct = {
+            id: i,
+            name,
+            price,
+            type,
+            size,
+            description,
+            image: url,
+            createdAt: date,
+            updatedAt: date
+          }
 
-      // check if product is available in store
-      if (products.some((product: ProductI) => product.id === id))
-        toast({
-          title: 'Action successful',
-          description: 'Product created successfully',
-          variant: 'success'
-        })
-      else
-        toast({
-          title: 'Action failed',
-          description: 'Product creation failed',
-          variant: 'error'
-        })
+          setProducts((prevProducts: ProductI[]) => [...prevProducts, newProduct])
 
-      // set loading
-      setLoading(false)
+          toast({
+            title: 'Action successful',
+            description: 'Product created successfully',
+            variant: 'success'
+          })
+          // set loading
+
+          // navigate to the product page
+          navigate(`/`)
+        })
+        .catch(() => {
+          toast({
+            title: 'Action failed',
+            description: 'Product creation failed',
+            variant: 'error'
+          })
+        })
+        .finally(() => setLoading(false))
     },
     [toast, products]
   )
@@ -148,19 +190,11 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
       prevProducts.filter((product: ProductI) => product.id !== id)
     )
 
-    // check if product is available in store
-    if (products.some((product: ProductI) => product.id === id))
-      toast({
-        title: 'Action successful',
-        description: 'Product deleted successfully',
-        variant: 'success'
-      })
-    else
-      toast({
-        title: 'Action failed',
-        description: 'Product deletion failed',
-        variant: 'error'
-      })
+    toast({
+      title: 'Action successful',
+      description: 'Product deleted successfully',
+      variant: 'success'
+    })
 
     // set loading
     setLoading(false)
@@ -169,23 +203,24 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
   const DELETE_MANY = useCallback((ids: string[]): void => {
     // set loading
     setLoading(true)
+    if (ids.length < 1) {
+      toast({
+        title: 'Action incomplete',
+        description: 'Nproducts to be deleted',
+        variant: 'info'
+      })
+
+      return
+    }
     setProducts((prevProducts: ProductI[]) =>
       prevProducts.filter((product: ProductI) => !ids.includes(product.id))
     )
 
-    // check if product is available in store
-    if (products.some((product: ProductI) => ids.includes(product.id)))
-      toast({
-        title: 'Action successful',
-        description: 'Products deleted successfully',
-        variant: 'success'
-      })
-    else
-      toast({
-        title: 'Action failed',
-        description: 'Products deletion failed',
-        variant: 'error'
-      })
+    toast({
+      title: 'Action successful',
+      description: 'Products deleted successfully',
+      variant: 'success'
+    })
 
     // set loading
     setLoading(false)

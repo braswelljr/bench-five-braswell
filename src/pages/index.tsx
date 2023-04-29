@@ -1,10 +1,12 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '~/context/useStore'
 import { toDollars } from '~/utils/currency'
 import { ProductII } from '~/types/store'
 
 export default function App() {
-  const { products } = useStore()
+  const { products, DELETE_MANY } = useStore()
+  const deleteIds: string[] = []
 
   return (
     <main className="">
@@ -21,6 +23,7 @@ export default function App() {
           <button
             type="button"
             className="rounded-sm border-2 border-neutral-800 px-3 py-1.5 font-bold"
+            onClick={() => DELETE_MANY(deleteIds)}
           >
             Mass Delete
           </button>
@@ -29,27 +32,46 @@ export default function App() {
       {/* body */}
       <section className="mx-auto max-w-5xl px-2 py-7 max-lg:mx-5 xl:max-w-7xl">
         {Array.isArray(products) && products.length > 0 ? (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8">
-            {products.map((product: ProductII) => (
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-8">
+            {products.map((product: ProductII, i) => (
               <div
                 key={product.id}
-                className="flex flex-col items-center justify-center rounded-md border-2 border-neutral-800 p-4"
+                className="grid grid-cols-[3rem,1fr] rounded-md border-2 border-neutral-800 p-4"
               >
+                {/* action */}
                 <div className="">
+                  <input
+                    type="checkbox"
+                    name={'check-' + i}
+                    id={'check-' + i}
+                    className="accent-brown-200 block h-5 w-5 rounded border-0 bg-neutral-300 accent-neutral-900 outline-none transition-all focus:outline-none focus:ring-0 dark:bg-neutral-900"
+                    tabIndex={-1}
+                    onChange={e =>
+                      e.target.checked
+                        ? deleteIds.push(product.id)
+                        : deleteIds.splice(deleteIds.indexOf(product.id), 1)
+                    }
+                  />
+                </div>
+                {/* body */}
+                <div className="space-y-2">
                   <div className="line-clamp-1">{product.id}</div>
-                  <div className="">{product.name}</div>
+                  <div className="font-bold uppercase">{product.name}</div>
                   <div className="">{toDollars(product.price)}</div>
-                  {product.type === 'dvd' && product.size && product.size.size && (
-                    <div className="">{product.size.size}</div>
-                  )}
-                  {product.type === 'book' && product.size && product.size.weight && (
-                    <div className="">{product.size.weight}</div>
-                  )}
-                  {product.type === 'furniture' && product.size && (
-                    <div className="">
-                      {product.size.height} x {product.size.width} x {product.size.length}
-                    </div>
-                  )}
+                  <div className="text-sm">
+                    {product.type === 'dvd' && product.size && product.size.size && (
+                      <div className="">Size : {product.size.size} MB</div>
+                    )}
+                    {product.type === 'book' && product.size && product.size.weight && (
+                      <div className="">Weight : {product.size.weight} KG</div>
+                    )}
+                    {product.type === 'furniture' && product.size && (
+                      <div className="">
+                        Dimensions : {product.size.height} x {product.size.width} x{' '}
+                        {product.size.length}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

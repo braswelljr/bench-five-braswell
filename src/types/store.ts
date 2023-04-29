@@ -60,7 +60,7 @@ export interface ProductRequestI {
   id?: string
   name: string
   price: number
-  image: string
+  image: File[]
   type: ProductType
   size: ProductSize
   description: string
