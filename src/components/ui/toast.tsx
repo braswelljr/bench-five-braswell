@@ -89,7 +89,7 @@ const ToastTitle = forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={clsx('text-xsm font-semibold uppercase', className)}
+    className={clsx('text-xs font-semibold uppercase sm:text-xsm', className)}
     {...props}
   />
 ))
@@ -101,7 +101,7 @@ const ToastDescription = forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={clsx('line-clamp-3 text-sm opacity-90', className)}
+    className={clsx('line-clamp-3 text-xs opacity-90 sm:text-sm', className)}
     {...props}
   />
 ))

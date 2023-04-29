@@ -14,18 +14,18 @@ export default function App() {
   return (
     <main className="">
       {/* navigation */}
-      <nav className="flex items-center justify-between border-b-2 border-neutral-800 px-6 py-6 md:px-12">
-        <h1 className="text-2xl font-bold">Product List</h1>
-        <ul className="flex items-center space-x-4">
+      <nav className="flex items-center justify-between border-b-2 border-neutral-800 px-6 py-4 md:px-12">
+        <h1 className="text-xs font-black xsm:text-base sm:text-2xl">Product List</h1>
+        <ul className="flex items-center space-x-2 max-lg:text-base max-md:text-xs sm:space-x-4">
           <Link
             to="/add-product"
-            className="rounded border-2 border-neutral-800 px-3 py-1.5 font-bold"
+            className="rounded border-2 border-neutral-800 px-3 py-1.5 font-bold max-sm:px-2 max-sm:py-1"
           >
             Add
           </Link>
           <button
             type="button"
-            className="rounded-sm border-2 border-neutral-800 px-3 py-1.5 font-bold"
+            className="rounded-sm border-2 border-neutral-800 px-3 py-1.5 font-bold max-sm:px-2 max-sm:py-1"
             onClick={() => DELETE_MANY(deleteIds)}
           >
             Mass Delete
@@ -42,8 +42,6 @@ export default function App() {
                   key={product.id}
                   layoutId={product.id}
                   className="grid grid-cols-[3rem,1fr] rounded-md border-2 border-neutral-800 p-4"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
                 >
                   {/* action */}
                   <div className="">
@@ -99,12 +97,7 @@ export default function App() {
 
             <AnimatePresence>
               {selectedProduct && (
-                <motion.div
-                  className="fixed inset-0 flex items-center justify-center"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
+                <motion.div className="fixed inset-0 flex items-center justify-center">
                   <motion.button
                     className="absolute inset-0 block h-full w-full bg-neutral-900 bg-opacity-40"
                     tabIndex={-1}
@@ -112,14 +105,14 @@ export default function App() {
                   />
                   <motion.div
                     className="relative z-10 grid w-11/12 grid-cols-1 items-stretch rounded-md bg-white max-sm:max-w-3xl sm:w-auto md:grid-cols-[2fr,3fr]"
-                    onClick={() => null}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
                     layoutId={selectedProduct.id}
                   >
-                    <div className="grid min-h-[20rem] place-items-center bg-neutral-500">
-                      <img src={selectedProduct.image} alt={selectedProduct.name} />
+                    <div className="relative min-h-[20rem] overflow-hidden bg-neutral-500">
+                      <img
+                        src={selectedProduct.image}
+                        alt={selectedProduct.name}
+                        className="absolute inset-0 h-full w-full object-fill object-center"
+                      />
                     </div>
                     <div className="relative px-3 py-4 pr-4 pt-4">
                       <button
@@ -172,14 +165,14 @@ export default function App() {
         ) : (
           <div className="grid min-h-[80vh] place-items-center">
             <div className="space-y-8 text-center">
-              <h1 className="text-2xl font-bold">No products found</h1>
-              <p className="text-lg text-neutral-500">
+              <h1 className="text-2xl font-extrabold max-sm:text-lg">No products found</h1>
+              <p className="text-lg text-neutral-500 max-sm:text-base max-xsm:text-xs">
                 You can add a product by clicking on the add button.
               </p>
               <p className="">
                 <Link
                   to="/add-product"
-                  className="rounded border-2 border-neutral-800 px-3 py-1.5 font-bold"
+                  className="rounded-sm border-2 border-neutral-800 bg-neutral-900 px-4 py-2 font-bold text-white"
                 >
                   Add
                 </Link>

@@ -206,7 +206,7 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
     if (ids.length < 1) {
       toast({
         title: 'Action incomplete',
-        description: 'Nproducts to be deleted',
+        description: 'No products to be deleted',
         variant: 'info'
       })
 

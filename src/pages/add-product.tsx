@@ -124,17 +124,13 @@ export default function AddProduct() {
         className=""
       >
         {/* navigation */}
-        <nav className="flex items-center justify-between border-b-2 border-neutral-800 px-6 py-6 md:px-12">
-          <h1 className="text-2xl font-bold">Product Add</h1>
-          <ul className="flex items-center space-x-4">
-            <button
-              type="submit"
-              className="rounded-sm border-2 border-neutral-800 px-3 py-1.5 font-bold"
-              disabled={loading}
+        <nav className="flex items-center justify-between border-b-2 border-neutral-800 px-6 py-4 md:px-12">
+          <h1 className="text-xs font-black xsm:text-base sm:text-2xl">Product Add</h1>
+          <ul className="flex items-center space-x-2 max-lg:text-base max-md:text-xs sm:space-x-4">
+            <Link
+              to="/"
+              className="rounded-sm border-2 border-neutral-800 px-3 py-1.5 font-bold max-sm:px-2 max-sm:py-1"
             >
-              {loading ? <Spinner className="h-3 w-3 text-neutral-800" /> : 'Add'}
-            </button>
-            <Link to="/" className="rounded border-2 border-neutral-800 px-3 py-1.5 font-bold">
               Cancel
             </Link>
           </ul>
@@ -145,15 +141,31 @@ export default function AddProduct() {
           <div className="">
             <div className="">
               {previewImage && (
-                <img src={previewImage} alt="preview image" className="h-28 w-auto" />
+                <img
+                  src={previewImage}
+                  alt="preview image"
+                  className="mx-auto mb-8 h-28 w-auto object-cover object-center"
+                />
               )}
             </div>
-            <label className="block">
+            <label
+              className={clsx('block overflow-hidden rounded-md border-2 focus:outline-none', {
+                'focus:border-primary-400 focus:ring-primary-400 border-neutral-500': !errors.image,
+                'border-red-500 focus:border-red-500 focus:ring-red-500': errors.image
+              })}
+            >
               <span className="sr-only">Choose profile photo</span>
               <input
                 type="file"
                 accept="image/*"
-                className="block w-full text-sm text-neutral-800 file:mr-8 file:rounded-md file:border-0 file:bg-neutral-300 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-neutral-700 hover:file:bg-neutral-100"
+                className={clsx(
+                  'block w-full text-sm text-white file:mr-8 file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-neutral-950',
+                  {
+                    'focus:border-primary-400 focus:ring-primary-400 border-neutral-500':
+                      !errors.image,
+                    'border-red-500 focus:border-red-500 focus:ring-red-500': errors.image
+                  }
+                )}
                 {...register('image', { required: true })}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   const file = event.target.files && event.target.files[0]
@@ -169,12 +181,12 @@ export default function AddProduct() {
             </label>
           </div>
           {/* id */}
-          <div className="grid grid-cols-[10rem,1fr] items-center">
+          <div className="grid items-center text-sm  md:grid-cols-[10rem,1fr] md:text-base">
             <div className="block text-sm font-medium text-neutral-800">SKU</div>
-            <div className="mt-1">#SKU will be generated on creating</div>
+            <div className="mt-1">#SKU will be generated on creation</div>
           </div>
           {/* name */}
-          <div className="grid grid-cols-[10rem,1fr] items-start">
+          <div className="grid items-start text-sm  md:grid-cols-[10rem,1fr] md:text-base">
             <label htmlFor="name" className="block pt-3 text-sm font-medium text-neutral-800">
               Name
             </label>
@@ -219,7 +231,7 @@ export default function AddProduct() {
             </div>
           </div>
           {/* price */}
-          <div className="grid grid-cols-[10rem,1fr] items-start">
+          <div className="grid items-start text-sm  md:grid-cols-[10rem,1fr] md:text-base">
             <label htmlFor="price" className="block pt-3 text-sm font-medium text-neutral-800">
               Price (USD $)
             </label>
@@ -279,7 +291,7 @@ export default function AddProduct() {
             </div>
           </div>
           {/* select */}
-          <div className="grid grid-cols-[10rem,1fr] items-start">
+          <div className="grid items-start text-sm  md:grid-cols-[10rem,1fr] md:text-base">
             <label htmlFor="price" className="block pt-3 text-sm font-medium text-neutral-800">
               Type Switcher
             </label>
@@ -300,9 +312,9 @@ export default function AddProduct() {
             {type === 'dvd' && (
               <div className="space-y-5">
                 {/* size */}
-                <div className="grid grid-cols-[10rem,1fr] items-start">
+                <div className="grid items-start text-sm  md:grid-cols-[10rem,1fr] md:text-base">
                   <label htmlFor="size" className="block pt-3 text-sm font-medium text-neutral-800">
-                    Size (MD)
+                    Size (MB)
                   </label>
                   <div className="mt-1">
                     <input
@@ -367,7 +379,7 @@ export default function AddProduct() {
             {type === 'book' && (
               <div className="space-y-5">
                 {/* Weight */}
-                <div className="grid grid-cols-[10rem,1fr] items-start">
+                <div className="grid items-start text-sm  md:grid-cols-[10rem,1fr] md:text-base">
                   <label
                     htmlFor="weight"
                     className="block pt-3 text-sm font-medium text-neutral-800"
@@ -438,7 +450,7 @@ export default function AddProduct() {
             {type === 'furniture' && (
               <div className="space-y-5">
                 {/* Height */}
-                <div className="grid grid-cols-[10rem,1fr] items-start">
+                <div className="grid items-start text-sm  md:grid-cols-[10rem,1fr] md:text-base">
                   <label
                     htmlFor="height"
                     className="block pt-3 text-sm font-medium text-neutral-800"
@@ -502,7 +514,7 @@ export default function AddProduct() {
                 </div>
 
                 {/* width */}
-                <div className="grid grid-cols-[10rem,1fr] items-start">
+                <div className="grid items-start text-sm  md:grid-cols-[10rem,1fr] md:text-base">
                   <label
                     htmlFor="width"
                     className="block pt-3 text-sm font-medium text-neutral-800"
@@ -566,7 +578,7 @@ export default function AddProduct() {
                 </div>
 
                 {/* Lenght */}
-                <div className="grid grid-cols-[10rem,1fr] items-start">
+                <div className="grid items-start text-sm  md:grid-cols-[10rem,1fr] md:text-base">
                   <label
                     htmlFor="length"
                     className="block pt-3 text-sm font-medium text-neutral-800"
@@ -636,7 +648,7 @@ export default function AddProduct() {
           </div>
 
           {/* description */}
-          <div className="grid grid-cols-[10rem,1fr] items-start">
+          <div className="grid items-start text-sm  md:grid-cols-[10rem,1fr] md:text-base">
             <label htmlFor="name" className="block pt-3 text-sm font-medium text-neutral-800">
               Description
             </label>
