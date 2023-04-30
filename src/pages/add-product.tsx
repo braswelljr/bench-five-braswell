@@ -26,7 +26,7 @@ export default function AddProduct() {
     price: number
     type: ProductType
     size: ProductSize
-    image: File[]
+    image: FileList
     description: string
   }
 
@@ -54,48 +54,12 @@ export default function AddProduct() {
     reset()
   }
 
-  const onError: SubmitErrorHandler<Inputs> = errors => {
-    errors.description &&
-      toast({
-        variant: 'error',
-        title: 'Description is required',
-        description: 'Provide a description for the product'
-      })
-
-    errors.name &&
-      toast({
-        variant: 'error',
-        title: 'Name is required',
-        description: 'Provide a name for the product'
-      })
-
-    errors.price &&
-      toast({
-        variant: 'error',
-        title: 'Price is required',
-        description: 'Provide a price for the product'
-      })
-
-    errors.image &&
-      toast({
-        variant: 'error',
-        title: 'Image is required',
-        description: 'Provide an image for the product'
-      })
-
-    errors.size &&
-      toast({
-        variant: 'error',
-        title: 'Size is required',
-        description: 'Provide a size for the product'
-      })
-
-    errors.type &&
-      toast({
-        variant: 'error',
-        title: 'Type is required',
-        description: 'Select a type for the product'
-      })
+  const onError: SubmitErrorHandler<Inputs> = () => {
+    toast({
+      variant: 'error',
+      title: 'Fields required',
+      description: 'Provide all required fields for the product'
+    })
   }
 
   // load on submit
@@ -113,6 +77,18 @@ export default function AddProduct() {
   useEffect(() => {
     setValue('type', type)
   }, [type])
+
+  useEffect(() => {
+    const image = getValues('image')
+    const file = image && image[0]
+
+    if (file) {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+
+      reader.onload = () => setPreviewImage(reader.result as string)
+    } else setPreviewImage(undefined)
+  }, [])
 
   return (
     <main className="">

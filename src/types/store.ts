@@ -1,10 +1,12 @@
+import { FullMetadata, StorageReference } from 'firebase/storage'
+
 export interface StoreContextI {
   products: ProductI[]
   isLoading: boolean
-  ADD: (product: ProductRequestI) => void
+  ADD: (product: ProductRequestI) => Promise<void>
   GET: (id: string) => ProductI | undefined
   UPDATE: (id: string, product: Partial<ProductI>) => void
-  DELETE: (id: string) => void
+  DELETE: (id: string) => Promise<void>
   DELETE_MANY: (ids: string[]) => void
 }
 
@@ -30,7 +32,10 @@ export interface ProductII {
   id: string
   name: string
   price: number
-  image: string
+  image: {
+    url: string
+    ref: StorageReference
+  }
   type: ProductType
   size: {
     width?: number
@@ -48,7 +53,11 @@ export interface ProductI {
   id: string
   name: string
   price: number
-  image: string
+  image: {
+    url: string
+    ref: StorageReference
+    metadata: FullMetadata
+  }
   type: ProductType
   size: ProductSize
   description: string
@@ -60,7 +69,7 @@ export interface ProductRequestI {
   id?: string
   name: string
   price: number
-  image: File[]
+  image: FileList
   type: ProductType
   size: ProductSize
   description: string

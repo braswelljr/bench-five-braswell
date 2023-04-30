@@ -10,7 +10,7 @@ import {
 import { v4 as uuid } from 'uuid'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '~/hooks/useToast'
-import { getDownloadURL, storageRef, uploadBytes } from '~/utils/firebase'
+import { deleteObject, getDownloadURL, storageRef, uploadBytes } from '~/utils/firebase'
 import { ProductI, ProductRequestI, StoreContextI, StoreProviderI } from '~/types/store'
 
 /**
@@ -20,10 +20,10 @@ import { ProductI, ProductRequestI, StoreContextI, StoreProviderI } from '~/type
 export const StoreContext: Context<StoreContextI> = createContext<StoreContextI>({
   products: [],
   isLoading: false,
-  ADD: () => {},
+  ADD: async () => {},
   GET: () => undefined,
   UPDATE: () => {},
-  DELETE: () => {},
+  DELETE: async () => {},
   DELETE_MANY: () => {}
 })
 
@@ -71,51 +71,57 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
       const pathReference = storageRef(`/bench-five/images/${i}`)
 
       // upload the image to firebase storage
-      const res = await uploadBytes(pathReference, image[0], { contentType: image[0].type })
+      await uploadBytes(pathReference, image[0], { contentType: image[0].type })
+        .then(ref => {
+          // create a new product
+          getDownloadURL(pathReference)
+            .then(url => {
+              const newProduct = {
+                id: i,
+                name,
+                price,
+                type,
+                size,
+                description,
+                image: {
+                  url,
+                  ref: ref.ref,
+                  metadata: ref.metadata
+                },
+                createdAt: date,
+                updatedAt: date
+              }
 
-      // check if the image is uploaded
-      if (!res) {
-        toast({
-          title: 'Action failed',
-          description: 'Image upload failed',
-          variant: 'error'
+              setProducts((prevProducts: ProductI[]) => [...prevProducts, newProduct])
+
+              toast({
+                title: 'Action successful',
+                description: 'Product created successfully',
+                variant: 'success'
+              })
+              // navigate to the product page
+              navigate(`/`)
+            })
+            .catch(err => {
+              console.log(err)
+              toast({
+                title: 'Action failed',
+                description: 'Product creation failed',
+                variant: 'error'
+              })
+            })
         })
-      }
-
-      // create a new product
-      getDownloadURL(pathReference)
-        .then(url => {
-          const newProduct = {
-            id: i,
-            name,
-            price,
-            type,
-            size,
-            description,
-            image: url,
-            createdAt: date,
-            updatedAt: date
-          }
-
-          setProducts((prevProducts: ProductI[]) => [...prevProducts, newProduct])
-
-          toast({
-            title: 'Action successful',
-            description: 'Product created successfully',
-            variant: 'success'
-          })
-          // set loading
-
-          // navigate to the product page
-          navigate(`/`)
-        })
-        .catch(() => {
+        .catch(err => {
+          console.log(err)
           toast({
             title: 'Action failed',
-            description: 'Product creation failed',
+            description: 'Image upload failed',
             variant: 'error'
           })
+
+          return
         })
+
         .finally(() => setLoading(false))
     },
     [toast, products]
@@ -181,26 +187,41 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
     [toast, products]
   )
 
-  const DELETE = useCallback((id: string): void => {
+  const DELETE = useCallback(async (id: string): Promise<void> => {
     // set loading
     setLoading(true)
 
     // delete the product
     setProducts((prevProducts: ProductI[]) =>
-      prevProducts.filter((product: ProductI) => product.id !== id)
+      prevProducts.filter(async (product: ProductI) => {
+        const pathReference = storageRef(`/bench-five/images/${product.id}`)
+
+        // the ref from the product image
+        await deleteObject(pathReference).catch(error => console.log(error))
+
+        return product.id !== id
+      })
     )
 
-    toast({
-      title: 'Action successful',
-      description: 'Product deleted successfully',
-      variant: 'success'
-    })
+    if (products.some(product => product.id === id)) {
+      toast({
+        title: 'Action Failed',
+        description: "Couldn't delete Product",
+        variant: 'error'
+      })
+    } else {
+      toast({
+        title: 'Action Successful',
+        description: 'Product deleted successfully',
+        variant: 'success'
+      })
+    }
 
     // set loading
     setLoading(false)
   }, [])
 
-  const DELETE_MANY = useCallback((ids: string[]): void => {
+  const DELETE_MANY = useCallback(async (ids: string[]): Promise<void> => {
     // set loading
     setLoading(true)
     if (ids.length < 1) {
@@ -212,16 +233,37 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
 
       return
     }
+
+    // delete the product
     setProducts((prevProducts: ProductI[]) =>
-      prevProducts.filter((product: ProductI) => !ids.includes(product.id))
+      prevProducts.filter((product: ProductI) => {
+        // skip the product if it is not in the ids
+        if (ids.includes(product.id)) {
+          // the ref from the product image
+          deleteObject(storageRef(`/bench-five/images/${product.id}`)).catch(error =>
+            console.log(error)
+          )
+        }
+
+        // return true if the product is not in the ids
+        return !ids.includes(product.id)
+      })
     )
 
-    toast({
-      title: 'Action successful',
-      description: 'Products deleted successfully',
-      variant: 'success'
-    })
-
+    // check if the product is not updated
+    if (products.some(product => ids.includes(product.id))) {
+      toast({
+        title: 'Action Failed',
+        description: "Couldn't delete all selected Products",
+        variant: 'error'
+      })
+    } else {
+      toast({
+        title: 'Action Successful',
+        description: 'Products deleted successfully',
+        variant: 'success'
+      })
+    }
     // set loading
     setLoading(false)
   }, [])

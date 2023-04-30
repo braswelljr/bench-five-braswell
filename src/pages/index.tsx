@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { HiX } from 'react-icons/hi'
+import { useEffect, useState } from 'react'
+import { HiTrash, HiX } from 'react-icons/hi'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useStore } from '~/context/useStore'
@@ -7,15 +7,24 @@ import { toDollars } from '~/utils/currency'
 import { ProductII } from '~/types/store'
 
 export default function App() {
-  const { products, DELETE_MANY } = useStore()
-  const deleteIds: string[] = []
+  const { products, DELETE_MANY, DELETE } = useStore()
+  const [deleteIds, setDeleteIds] = useState<string[]>([])
   const [selectedProduct, setSelectedProduct] = useState<ProductII | null>(null)
+
+  // sync selected product
+  useEffect(() => {
+    if (selectedProduct) {
+      setSelectedProduct(products.find(product => product.id === selectedProduct.id) || null)
+    }
+  }, [products, selectedProduct])
+
+  // sync delete ids
 
   return (
     <main className="">
       {/* navigation */}
       <nav className="flex items-center justify-between border-b-2 border-neutral-800 px-6 py-4 md:px-12">
-        <h1 className="text-xs font-black xsm:text-base sm:text-2xl">Product List</h1>
+        <h1 className="text-sm font-black xsm:text-base sm:text-2xl">Product List</h1>
         <ul className="flex items-center space-x-2 max-lg:text-base max-md:text-xs sm:space-x-4">
           <Link
             to="/add-product"
@@ -36,7 +45,7 @@ export default function App() {
       <section className="mx-auto max-w-5xl px-6 py-7 max-lg:mx-5 md:px-12 xl:max-w-7xl">
         {Array.isArray(products) && products.length > 0 ? (
           <div className="">
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-8">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-8 text-xs xsm:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
               {products.map((product: ProductII, i) => (
                 <motion.div
                   key={product.id}
@@ -53,8 +62,8 @@ export default function App() {
                       tabIndex={-1}
                       onChange={e =>
                         e.target.checked
-                          ? deleteIds.push(product.id)
-                          : deleteIds.splice(deleteIds.indexOf(product.id), 1)
+                          ? setDeleteIds(ids => [...ids, product.id])
+                          : setDeleteIds(ids => ids.filter(id => id !== product.id))
                       }
                     />
                   </div>
@@ -107,11 +116,11 @@ export default function App() {
                     className="relative z-10 grid w-11/12 grid-cols-1 items-stretch rounded-md bg-white max-sm:max-w-3xl sm:w-auto md:grid-cols-[2fr,3fr]"
                     layoutId={selectedProduct.id}
                   >
-                    <div className="relative min-h-[20rem] overflow-hidden bg-neutral-500">
+                    <div className="relative min-h-[20rem] overflow-hidden bg-neutral-900">
                       <img
-                        src={selectedProduct.image}
+                        src={selectedProduct.image.url}
                         alt={selectedProduct.name}
-                        className="absolute inset-0 h-full w-full object-fill object-center"
+                        className="absolute inset-0 h-full w-full object-cover object-center"
                       />
                     </div>
                     <div className="relative px-3 py-4 pr-4 pt-4">
@@ -149,10 +158,22 @@ export default function App() {
                         </div>
                         {/* type */}
                         <div className="">
-                          <div className="">
+                          <div className="flex items-center justify-between">
                             <span className="bg-neutral-300 px-2 py-1 font-bold uppercase">
                               {selectedProduct.type}
                             </span>
+
+                            <button
+                              type="button"
+                              className="inline-flex items-center space-x-2 bg-red-600 px-2 py-1 font-bold uppercase text-white hover:bg-red-500 focus:outline"
+                              tabIndex={-1}
+                              onClick={() =>
+                                DELETE(selectedProduct.id).then(() => setSelectedProduct(null))
+                              }
+                            >
+                              <HiTrash className="h-5 w-auto" />
+                              <span>Delete</span>
+                            </button>
                           </div>
                         </div>
                       </div>
