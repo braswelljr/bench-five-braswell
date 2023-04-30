@@ -1,4 +1,4 @@
-import { FullMetadata, StorageReference } from 'firebase/storage'
+import { FullMetadata } from 'firebase/storage'
 
 export interface StoreContextI {
   products: ProductI[]
@@ -34,7 +34,7 @@ export interface ProductII {
   price: number
   image: {
     url: string
-    ref: StorageReference
+    metadata: FullMetadata
   }
   type: ProductType
   size: {
@@ -55,7 +55,6 @@ export interface ProductI {
   price: number
   image: {
     url: string
-    ref: StorageReference
     metadata: FullMetadata
   }
   type: ProductType

@@ -71,7 +71,7 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
       const pathReference = storageRef(`/bench-five/images/${i}`)
 
       // upload the image to firebase storage
-      await uploadBytes(pathReference, image[0], { contentType: image[0].type })
+      uploadBytes(pathReference, image[0], { contentType: image[0].type })
         .then(ref => {
           // create a new product
           getDownloadURL(pathReference)
