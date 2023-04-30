@@ -72,9 +72,9 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
 
       // upload the image to firebase storage
       uploadBytes(pathReference, image[0], { contentType: image[0].type })
-        .then(ref => {
+        .then(snapshot => {
           // create a new product
-          getDownloadURL(pathReference)
+          getDownloadURL(snapshot.ref)
             .then(url => {
               const newProduct = {
                 id: i,
@@ -85,8 +85,7 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
                 description,
                 image: {
                   url,
-                  ref: ref.ref,
-                  metadata: ref.metadata
+                  metadata: snapshot.metadata
                 },
                 createdAt: date,
                 updatedAt: date
@@ -102,8 +101,7 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
               // navigate to the product page
               navigate(`/`)
             })
-            .catch(err => {
-              console.log(err)
+            .catch(() => {
               toast({
                 title: 'Action failed',
                 description: 'Product creation failed',
@@ -111,17 +109,13 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
               })
             })
         })
-        .catch(err => {
-          console.log(err)
+        .catch(() => {
           toast({
             title: 'Action failed',
-            description: 'Image upload failed',
+            description: 'Product creation failed',
             variant: 'error'
           })
-
-          return
         })
-
         .finally(() => setLoading(false))
     },
     [toast, products]
