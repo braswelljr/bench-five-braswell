@@ -72,33 +72,42 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
 
       // upload the image to firebase storage
       uploadBytes(pathReference, image[0], { contentType: image[0].type })
+        .then(snapshot => {
+          // create a new product
+          getDownloadURL(snapshot.ref)
+            .then(url => {
+              const newProduct = {
+                id: i,
+                name,
+                price,
+                type,
+                size,
+                description,
+                image: {
+                  url,
+                  metadata: snapshot.metadata
+                },
+                createdAt: date,
+                updatedAt: date
+              }
 
-      // create a new product
-      getDownloadURL(pathReference)
-        .then(url => {
-          const newProduct = {
-            id: i,
-            name,
-            price,
-            type,
-            size,
-            description,
-            image: {
-              url
-            },
-            createdAt: date,
-            updatedAt: date
-          }
+              setProducts((prevProducts: ProductI[]) => [...prevProducts, newProduct])
 
-          setProducts((prevProducts: ProductI[]) => [...prevProducts, newProduct])
-
-          toast({
-            title: 'Action successful',
-            description: 'Product created successfully',
-            variant: 'success'
-          })
-          // navigate to the product page
-          navigate(`/`)
+              toast({
+                title: 'Action successful',
+                description: 'Product created successfully',
+                variant: 'success'
+              })
+              // navigate to the product page
+              navigate(`/`)
+            })
+            .catch(() => {
+              toast({
+                title: 'Action failed',
+                description: 'Product creation failed',
+                variant: 'error'
+              })
+            })
         })
         .catch(() => {
           toast({
@@ -107,6 +116,7 @@ export default function StoreProvider({ children }: StoreProviderI): JSX.Element
             variant: 'error'
           })
         })
+        .finally(() => setLoading(false))
     },
     [toast, products]
   )
