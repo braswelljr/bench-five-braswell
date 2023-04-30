@@ -34,7 +34,7 @@ export interface ProductII {
   price: number
   image: {
     url: string
-    metadata: FullMetadata
+    metadata?: FullMetadata
   }
   type: ProductType
   size: {
@@ -55,7 +55,7 @@ export interface ProductI {
   price: number
   image: {
     url: string
-    metadata: FullMetadata
+    metadata?: FullMetadata
   }
   type: ProductType
   size: ProductSize
